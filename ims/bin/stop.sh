@@ -1,0 +1,7 @@
+#!/bin/bash
+
+sudo ./stop.fhoss.sh
+sudo ./stop.pcscf.sh
+sudo ./stop.icscf.sh
+sudo ./stop.scscf.sh
+sudo ./stop.presence.sh

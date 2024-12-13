@@ -1,0 +1,29 @@
+#
+# $Id$
+#
+# this example shows use of ser as stateless PUBLISH message receiver
+
+# ------------------ module loading ----------------------------------
+
+debug=1            # debug level
+fork=yes
+log_stderror=yes
+port=5065
+
+#set module path
+mpath="/usr/local/lib/opensips/modules/"
+
+loadmodule "sl.so"
+
+# -------------------------  request routing logic -------------------
+
+# main routing logic
+
+route{
+	if (method == "PUBLISH") {
+	    sl_send_reply("200", "OK");
+	    exit;
+        }
+	sl_send_reply("501", "Not implemented");
+}
+
