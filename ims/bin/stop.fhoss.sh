@@ -1,1 +1,0 @@
-kill.fhoss.sh
