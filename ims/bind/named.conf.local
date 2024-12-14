@@ -11,7 +11,7 @@ zone "acme.pt" {
         file "/etc/bind/open-ims1.dnszone";
 };
 
-zone "acmeB.pt" {
+zone "" {
         type master;
         file "/etc/bind/open-ims2.dnszone";
 };
