@@ -47,3 +47,4 @@ sems/Dockerfile-rhel7
 sems/Dockerfile-rhel8
 sems/Dockerfile-rhel9
 sems-antigo
+.venv

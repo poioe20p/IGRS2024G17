@@ -1,5 +1,0 @@
-#!/bin/bash
-
-/opt/OpenIMSCore/ser_ims/cfg/killser /opt/OpenIMSCore/etc/scscf.cfg
-
-ipcs -s
