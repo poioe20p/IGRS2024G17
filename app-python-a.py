@@ -56,18 +56,19 @@ class kamailio:
             KSR.info("        From: " + KSR.pv.get("$fu") + "\n")
             KSR.info("          To: " + KSR.pv.get("$tu") + "\n")
             
-            if (KSR.pv.get("$td") == "acme.pt" and KSR.pv.get("$fd") == "acme.pt"):   # Check if To domain is a.pt
+            if (KSR.pv.get("$td") == "acme.pt" and KSR.pv.get("$fd") == "acme.pt" 
+                or (KSR.pv.get("fd") == "sip:conference@127.0.0.1:5069" or KSR.pv.get("fd") == "sip:conference@acme.pt")):   # Check if To domain is a.pt
                 
                 if(KSR.pv.get("$fu") not in self.usersState and KSR.pv.get("$fu") != "sip:conference@acme.pt"):
                     KSR.info("User " + KSR.pv.get("$fu") + " is not registered\n")
                     KSR.sl.send_reply(404, "You have to register first")
                     return -1
                 
-                if(KSR.pv.get("$fu") == "sip:conference@acme.pt"):
+                if(KSR.pv.get("$fu") == "sip:conference@acme.pt" or KSR.pv.get("fd") == "sip:conference@acme.pt"):
                     KSR.info("User " + KSR.pv.get("$tu") + " is attempting to join a conference\n")
                     
                     self.usersState[KSR.pv.get("$tu")] = "InConference"
-                    KSR.pv.sets("$ru","sip:conference@127.0.0.1:5066")
+                    KSR.pv.sets("$fu","sip:conference@127.0.0.1:5069")
                     KSR.rr.record_route()
                     KSR.tm.t_relay()
                     KSR.info("User " + KSR.pv.get("$tu") + " has joined the conference\n")
@@ -75,7 +76,8 @@ class kamailio:
                     return 1
                 
                 if (KSR.pv.get("$tu") == "sip:conference@acme.pt"):  # Special To-URI
-                    KSR.pv.sets("$ru", "sip:conference@127.0.0.1:5066")
+                    KSR.pv.sets("$ru", "sip:conference@127.0.0.1:5069")
+                    KSR.pv.sets("$tu", "sip:conference@127.0.0.1:5069")
                     KSR.rr.record_route()
                     KSR.tm.t_relay()    # Relaying using transaction mode
                     
@@ -94,7 +96,8 @@ class kamailio:
                     KSR.info("User " + KSR.pv.get("$tu") + " is in call, redirecting to announcements server\n")
                     
                     self.usersState[KSR.pv.get("$fu")] = "Busy"
-                    KSR.pv.sets("$ru", "sip:callannouncement@127.0.0.1:5077")
+                    KSR.pv.sets("$ru", "sip:callannouncement@127.0.0.1:5079")
+                    KSR.pv.sets("$tu", "sip:callannouncement@127.0.0.1:5079")
                     KSR.rr.record_route()
                     KSR.tm.t_relay()
                     KSR.info("User " + KSR.pv.get("$fu") + " is busy, in announcement waiting for call to be accepted\n")
@@ -104,7 +107,8 @@ class kamailio:
                     KSR.info("User " + KSR.pv.get("$tu") + " is in conference, redirecting " + KSR.pv.get("$fu") + " to announcements server\n")
                     
                     self.usersState[KSR.pv.get("$fu")] = "InConference"
-                    KSR.pv.sets("$ru", "sip:confannouncement@127.0.0.1:5088")
+                    KSR.pv.sets("$ru", "sip:confannouncement@127.0.0.1:5089")
+                    KSR.pv.sets("$tu", "sip:confannouncement@127.0.0.1:5089")
                     KSR.rr.record_route()
                     KSR.tm.t_relay()
                     KSR.info("User " + KSR.pv.get("$fu") + " is InConference but (can also join conference)\n")
