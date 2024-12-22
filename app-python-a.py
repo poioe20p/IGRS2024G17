@@ -56,26 +56,29 @@ class kamailio:
             KSR.info("        From: " + KSR.pv.get("$fu") + "\n")
             KSR.info("          To: " + KSR.pv.get("$tu") + "\n")
             
-            if (KSR.pv.get("$td") == "acme.pt" and KSR.pv.get("$fd") == "acme.pt"):   # Check if To domain is a.pt
+            if (KSR.pv.get("$td") == "acme.pt" and KSR.pv.get("$fd") == "acme.pt" or KSR.pv.get("fu") == "sip:conference@127.0.0.1:5066"):   # Check if To domain is a.pt
+                
                 
                 if(KSR.pv.get("$fu") not in self.usersState and KSR.pv.get("$fu") != "sip:conference@acme.pt"):
                     KSR.info("User " + KSR.pv.get("$fu") + " is not registered\n")
                     KSR.sl.send_reply(404, "You have to register first")
                     return -1
                 
+                #if(KSR.pv.get("$fu") == "sip:conference@acme.pt" or KSR.pv.get("$fu") == "sip:conference@127.0.0.1:5066"):
                 if(KSR.pv.get("$fu") == "sip:conference@acme.pt"):
                     KSR.info("User " + KSR.pv.get("$tu") + " is attempting to join a conference\n")
                     
                     self.usersState[KSR.pv.get("$tu")] = "InConference"
-                    KSR.pv.sets("$ru","sip:conference@127.0.0.1:5066")
+                    KSR.pv.sets("$fu","sip:conference@127.0.0.1:5066")
                     KSR.rr.record_route()
                     KSR.tm.t_relay()
                     KSR.info("User " + KSR.pv.get("$tu") + " has joined the conference\n")
-                    KSR.sl.send_reply(200, "User joined conference successfully")
+                    KSR.sl.send_reply(200, "User joined the conference")
                     return 1
                 
                 if (KSR.pv.get("$tu") == "sip:conference@acme.pt"):  # Special To-URI
                     KSR.pv.sets("$ru", "sip:conference@127.0.0.1:5066")
+                    KSR.pv.sets("$tu", "sip:conference@127.0.0.1:5066")
                     KSR.rr.record_route()
                     KSR.tm.t_relay()    # Relaying using transaction mode
                     
@@ -95,6 +98,7 @@ class kamailio:
                     
                     self.usersState[KSR.pv.get("$fu")] = "Busy"
                     KSR.pv.sets("$ru", "sip:callannouncement@127.0.0.1:5077")
+                    KSR.pv.sets("$tu", "sip:callannouncement@127.0.0.1:5077")
                     KSR.rr.record_route()
                     KSR.tm.t_relay()
                     KSR.info("User " + KSR.pv.get("$fu") + " is busy, in announcement waiting for call to be accepted\n")
@@ -105,9 +109,11 @@ class kamailio:
                     
                     self.usersState[KSR.pv.get("$fu")] = "InConference"
                     KSR.pv.sets("$ru", "sip:confannouncement@127.0.0.1:5088")
+                    KSR.pv.sets("$tu", "sip:confannouncement@127.0.0.1:5088")
                     KSR.rr.record_route()
                     KSR.tm.t_relay()
                     KSR.info("User " + KSR.pv.get("$fu") + " is InConference but (can also join conference)\n")
+                    KSR.info()
                     return 1
                 
                 if(self.usersState[KSR.pv.get("$tu")] == "Available"):
@@ -121,7 +127,7 @@ class kamailio:
                     return 1
                 
             KSR.info("User " + KSR.pv.get("$fu") + " is not in the same domain as the callee\n")
-            KSR.sl_send_reply(404, "Not found")
+            KSR.sl.send_reply(404, "Not found")
             return -1
 
         if (msg.Method == "ACK"):
@@ -169,7 +175,7 @@ class kamailio:
 
         if (msg.Method == "MESSAGE"):
             KSR.info("MESSAGE R-URI: " + KSR.pv.get("$ru") + "\n")
-            KSR.info("        From: " + KSR.pv.get("$fu") + " To:"+ KSR.pv.get("$tu") +"\n")
+            KSR.info("        From: " + KSR.pv.get("$fu") + "\n" + "To: "+ KSR.pv.get("$tu") +"\n")
             if (KSR.pv.get("$rd") == "acme.pt"):
                 if (KSR.registrar.lookup("location") == 1):
                     KSR.info("  lookup changed R-URI: " + KSR.pv.get("$ru") +"\n")
@@ -199,9 +205,9 @@ class kamailio:
                     
                     contact_value = "<sip:" + KSR.pv.get("$fu") + ">"
                     hdr = "Contact: " + contact_value + "\r\n"
+                    KSR.sl.send_reply(200, "Invite to conference from conference server to user" + KSR.pv.get("$fu") + "successfully sent")
                     KSR.pv.sets("$uac_req(hdrs)", hdr)
                     KSR.uac.uac_req_send()
-                    KSR.sl.send_reply(200, "Invite to conference from conference server to user" + KSR.pv.get("$fu") + "successfully sent")
                     return 1
                 
                 KSR.info("No action for DTMF received\n")
@@ -214,7 +220,7 @@ class kamailio:
 
     def ksr_reply_route(self, msg):
         KSR.info("===== response - from kamailio python script\n")
-        KSR.info("      Status is:"+ str(KSR.pv.get("$rs")) + "\n")
+        KSR.info("      Status is:"+ str(KSR.pv.get("$rs")) + "\n")            
         
         code_replied = int(KSR.pv.get("$rs"))
         KSR.info("Retrieve status code is: "+ str(code_replied) + "\n")

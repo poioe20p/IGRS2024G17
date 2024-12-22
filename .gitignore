@@ -48,3 +48,4 @@ sems/Dockerfile-rhel8
 sems/Dockerfile-rhel9
 sems-antigo
 .venv
+sems.conf
