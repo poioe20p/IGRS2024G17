@@ -56,8 +56,7 @@ class kamailio:
             KSR.info("        From: " + KSR.pv.get("$fu") + "\n")
             KSR.info("          To: " + KSR.pv.get("$tu") + "\n")
             
-            if (KSR.pv.get("$td") == "acme.pt" and KSR.pv.get("$fd") == "acme.pt" 
-                or (KSR.pv.get("fd") == "sip:conference@127.0.0.1:5069" or KSR.pv.get("fd") == "sip:conference@acme.pt")):   # Check if To domain is a.pt
+            if (KSR.pv.get("$td") == "acme.pt" and KSR.pv.get("$fd") == "acme.pt"):   # Check if To domain is a.pt
                 
                 if(KSR.pv.get("$fu") not in self.usersState and KSR.pv.get("$fu") != "sip:conference@acme.pt"):
                     KSR.info("User " + KSR.pv.get("$fu") + " is not registered\n")
@@ -125,7 +124,7 @@ class kamailio:
                     return 1
                 
             KSR.info("User " + KSR.pv.get("$fu") + " is not in the same domain as the callee\n")
-            KSR.sl_send_reply(404, "Not found")
+            KSR.sl.send_reply(403, "Forbidden: - Not in the same domain")
             return -1
 
         if (msg.Method == "ACK"):
